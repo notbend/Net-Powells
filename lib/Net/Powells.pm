@@ -1,5 +1,9 @@
+package Net::Powells;
 use strict;
 use warnings;
-package Net::Powells;
+
+# ABSTRACT: An interface the public Powells.com API
+
+
 
 1;
