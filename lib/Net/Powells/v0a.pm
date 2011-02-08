@@ -1,5 +1,10 @@
 package Net::Powells::v0a;
 use Moose;
+use URI;
+use LWP::Simple; 
+use JSON;
+
+our $VERSION = 0.001_1;
 
 has api_key =>
    is => 'ro',
@@ -10,62 +15,55 @@ has api_key =>
 has api_base_url => 
    is => 'ro',
    isa => 'Str', # TODO: be more strict
+   lazy => 1,
    default => sub{
       sprintf q{http://api.powells.com/v0a/%s}, shift->api_key
    },
 ;
 
-extends qw{Net::HTTP::API};
+has ua => 
+   is => 'rw',
+   isa => 'LWP::UserAgent',
+   lazy => 1,
+   default => sub{
+      require LWP::UserAgent;
+      my $ua = LWP::UserAgent->new; 
+      $ua->agent("Net::Powells::v0a/$VERSION ");
+      $ua->env_proxy;
+      return $ua;
+   },
+   handles => [qw{get}],
+;
 
-net_api_declare powells_api => (
-   api_format      => 'json',
-   api_format_mode => 'append',
-);
+around get => sub{
+   my $next = shift;
+   my $self = shift;
+   my $noun = shift;
+   my $value= shift;
 
-net_api_method inventory => (
-   description => 'Specific inventory data for a product.',
-   method      => 'GET',
-   path        => '/inventory/:pid',
-   params      => [qw/pid/],
-);
+   die unless defined $noun && length $noun;
 
-net_api_method product => (
-   description => 'General data for a product.',
-   method      => 'GET',
-   path        => '/product/:pid',
-   params      => [qw/pid/],
-);
+   my %opts = @_;
+   my $page = delete $opts{page};
 
-net_api_method content => (
-   description => 'Content about a product.',
-   method      => 'GET',
-   path        => '/content/:pid',
-   params      => [qw/pid/],
-);
+   my $url = URI->new(join '/', grep{defined} $self->api_base_url, $noun, $value, $page);
+   $url->query_form(\%opts);
+   
+   return from_json( $self->$next( $url->as_string )->content );
+};
 
-net_api_method locations => (
-   description => 'Information about our retail locations.'
-   method      => 'GET',
-   path        => '/locations/:slug',
-   params      => [qw/slug/],
-);
+sub inventory      { shift->get(inventory => @_); }
+sub product        { shift->get(product => @_); }
+sub content        { shift->get(content => @_); }
+sub locations      { shift->get(locations => @_); }
+sub search         { shift->get(search => @_); }
+sub recommendation { shift->get(recommendation => @_); }
+sub apistatus      { shift->get(apistatus => @_); }
 
-net_api_method search => (
-   description => 'Search for products given a keyword',
-   method      => 'GET',
-   path        => '/search/:kw',
-   params      => [qw/kw/],
-);
 
-net_api_method recommendation => (
-   description => 'Get recommendation for a product.',
-   method      => 'GET',
-   path        => '/recommendation/:pid',
-   params      => [qw/pid/],
-);
 
-net_api_method apistatus => (
-   description => 'Get the current status of the API',
-   method      => 'GET',
-   path        => '/apistatus',
-);
+# ok were done with things so lets lock things down so that we can gain some speed back.
+no Moose;
+__PACKAGE__->meta->make_immutable;
+
+1;
