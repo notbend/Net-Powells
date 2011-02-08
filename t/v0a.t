@@ -26,13 +26,14 @@ BEGIN {
 #-----------------------------------------------------------------
 #  
 #-----------------------------------------------------------------
+#ok my $api = Net::Powells::v0a->new( api_key => 'testing', api_version => 'v0x') ;
 ok my $api = Net::Powells::v0a->new( api_key => 'testing') ;
 isa_ok $api, 'Net::Powells::v0a', q{[Net::Powells::v0a] new()};
 
-#eq_or_diff
-#   $api->inventory('9780590353427'),
-#   {},
-#;
+eq_or_diff
+   $api->inventory('9780590353427', per_page => 2, debug => 1),
+   {},
+;
 
 eq_or_diff
    $api->product('9780590353427'),
