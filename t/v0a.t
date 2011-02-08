@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Test::Most qw{no_plan};
-use Carp::Always;
+#use Carp::Always;
 BEGIN{ print qq{\n} for 1..10};
 
 #-----------------------------------------------------------------
@@ -26,19 +26,32 @@ BEGIN {
 #-----------------------------------------------------------------
 #  
 #-----------------------------------------------------------------
-#ok my $api = Net::Powells::v0a->new( api_key => 'testing', api_version => 'v0x') ;
 ok my $api = Net::Powells::v0a->new( api_key => 'testing') ;
 isa_ok $api, 'Net::Powells::v0a', q{[Net::Powells::v0a] new()};
 
 eq_or_diff
-   $api->inventory('9780590353427', per_page => 2, debug => 1),
+   $api->apistatus,
    {},
+   q{apistatus},
 ;
+__END__
 
-eq_or_diff
-   $api->product('9780590353427'),
-   {},
+for my $type (qw{inventory product content recommendation}) {
+   is $api->$type('9780590353427')->{status},
+      q{success},
+      $type
+   ;
+}
+is $api->search('perl')->{status},
+   q{success},
+   q{search},
 ;
+is $api->locations->{status},
+   q{success},
+   q{search},
+;
+   
+
 
 
 
