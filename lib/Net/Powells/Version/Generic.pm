@@ -2,8 +2,21 @@ package Net::Powells::Version::Generic;
 use Moose;
 use JSON;
 
+has api_host =>
+  is => 'ro',
+  isa=> 'Str',
+  default => '',
+;
+
+has
 sub url {
-#something
+  my $self = shift;
+  my $url = sprintf q{http://%s/%s/%s/%s.json}
+                    ,$self->api_host
+                    ,$self->api_version
+		    ,$self->api_key
+                    ,join '/' @_;
+
 }
 sub get {
 #something

@@ -12,8 +12,8 @@ BEGIN{ print qq{\n} for 1..10};
 #-----------------------------------------------------------------
 BEGIN {
 
-   use_ok 'Net::Powells::v0a';
-   can_ok 'Net::Powells::v0a', 
+   use_ok 'Net::Powells::Version::v0a';
+   can_ok 'Net::Powells::Version::v0a', 
           qw{  inventory
                product
                content
@@ -26,8 +26,8 @@ BEGIN {
 #-----------------------------------------------------------------
 #  
 #-----------------------------------------------------------------
-ok my $api = Net::Powells::v0a->new( api_key => 'testing') ;
-isa_ok $api, 'Net::Powells::v0a', q{[Net::Powells::v0a] new()};
+ok my $api = Net::Powells::Version::v0a->new( api_key => 'testing') ;
+isa_ok $api, 'Net::Powells::Version::v0a', q{[Net::Powells::Version::v0a] new()};
 
 eq_or_diff
    $api->apistatus,
